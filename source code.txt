@@ -1,0 +1,326 @@
+ -------------Sign in------
+ {
+            query = "Select * from users";
+            ds = fn.getData(query);
+            if (ds.Tables[0].Rows.Count == 0)
+            {
+                if(usernametxt.Text=="root" && passwordTxt.Text == "root"){
+                    Administrator admin = new Administrator();
+                    admin.Show();
+                    this.Hide();
+                }
+            }
+            else
+            {
+                query = "Select * from users where username='" + usernametxt.Text + "' and password='" + passwordTxt.Text + "'";
+                ds = fn.getData(query);
+                if (ds.Tables[0].Rows.Count!=0)
+                    {
+                    String role = ds.Tables[0].Rows[0][1].ToString();
+                    if(role == "Administrator")
+                    {
+                        Administrator admin = new Administrator(usernametxt.Text);
+                        admin.Show();
+                        this.Hide();
+                    }
+                    else if (role == "Pharmacist")
+                    {
+                        Pharmacist pharm = new Pharmacist();
+                        pharm.Show();
+                        this.Hide();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Wrong Username Or Password", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+
+---------------------Reset
+ private void btnReset_Click(object sender, EventArgs e)
+        {
+            usernametxt.Clear();
+            passwordTxt.Clear();
+        }
+
+
+
+---------------------------Add user
+  private void guna2Button1_Click(object sender, EventArgs e)
+        {
+            String role = txtUserRole.Text;
+            String name = txtName.Text;
+            String dob = txtDob.Text;
+            Int64 mobile = Int64.Parse(txtMobleNo.Text);
+            String email = txtEmail.Text;
+            String username = txtUserName.Text;
+            String pass = txtPassword.Text;
+
+
+            try
+            {
+                query = "insert into users (userRole,name,dob,mobile,email,username,password) values ('"+role+"','"+name+"','"+dob+"',"+mobile+",'"+email+"','"+username+ "','"+pass+"')";
+                fn.setData(query, "Sign Up Successful");
+
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Username Already exist.", "error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            }
+
+        }
+-------------------------update user
+ private void guna2Button1_Click(object sender, EventArgs e)
+        {
+            String role = txtUserRole.Text;
+            String name = txtName.Text;
+            String dob = txtDob.Text;
+            Int64 mobile = Int64.Parse(txtMobile.Text);
+            String email = txtEmail.Text;
+            String username = userNameLabel.Text;
+            String pass = txtPassword.Text;
+
+            query = "update users set userRole = '" + role + "',name = '" + name + "',dob = '" + dob + "',mobile = '" + mobile + "',email = '" + email +"',password = '" + pass + "'";
+            fn.setData(query, "Profile Updation Successful.");
+        }
+
+------------------------display user profiles
+private void UC_profile_Enter(object sender, EventArgs e)
+        {
+            query = "Select * from users where username = '" + userNameLabel.Text + "'";
+            DataSet ds = fn.getData(query);
+            txtUserRole.Text = ds.Tables[0].Rows[0][1].ToString();
+            txtName.Text = ds.Tables[0].Rows[0][2].ToString();
+            txtDob.Text = ds.Tables[0].Rows[0][3].ToString();
+            txtMobile.Text = ds.Tables[0].Rows[0][4].ToString();
+            txtEmail.Text = ds.Tables[0].Rows[0][5].ToString();
+            txtPassword.Text = ds.Tables[0].Rows[0][7].ToString();
+        }
+
+
+-------------------view users
+ private void txtUsername_TextChanged(object sender, EventArgs e)
+        {
+            query = "Select * from users where username like '" + txtUsername.Text + "%'";//%
+            DataSet ds = fn.getData(query);
+            guna2DataGridView1.DataSource = ds.Tables[0];
+        }
+        String userName;
+        private void guna2DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                userName = guna2DataGridView1.Rows[e.RowIndex].Cells[6].Value.ToString();
+
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void btnSync_Click(object sender, EventArgs e)
+        {
+            UC_ViewUser_Load(this, null);
+        }
+    }
+}
+------------------------delete users
+  private void btnDelete_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you Sure?", "Delete Configuration !", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
+
+
+                if (currentUser != userName)
+                {
+                    query = "Delete From users where username = '" + userName + "'";
+                    fn.setData(query, "User Record Deleted");
+                    UC_ViewUser_Load(this, null);
+
+                }
+                else
+                {
+                    MessageBox.Show("You are Trying to Delete \n Your own Profile.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
+-----------------------Add medicine
+ public partial class UC_P_AddMedicine : UserControl
+    {
+        function fn = new function();
+        String query;
+        public UC_P_AddMedicine()
+        {
+            InitializeComponent();
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            if (txtMedicineId.Text != "" && txtMedicineName.Text != "" && TxtQuantity.Text != "" && txtPricePerUnit.Text != "")
+            {
+                String mid = txtMedicineId.Text;
+                String mname = txtMedicineName.Text;
+                String mnumber = txtMedicineNumber.Text;
+                String mdate = txtManufacturingDate.Text;
+                String edate = txtExpireDate.Text;
+                Int64 quantity = Int64.Parse(TxtQuantity.Text);
+                Int64 perunit = Int64.Parse(txtPricePerUnit.Text);
+
+                query = "Insert into medic(mid,mname,mnumber,mdate,edate,quantity,perUnit) values ('"+mid+ "','" +mname+ "','" +mnumber+ "','" +mdate+ "','" +edate+ "'," +quantity+ "," +perunit+ ")";
+                fn.setData(query, "Medicine Added to Database");
+
+
+
+            }
+            else
+            {
+                MessageBox.Show("Enter all Data.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+---------------------------------- Validity check
+ public partial class UC_P_MedicineValidityCheck : UserControl
+    {
+        function fn = new function();
+        String query;
+
+        public UC_P_MedicineValidityCheck()
+        {
+            InitializeComponent();
+        }
+
+        private void guna2ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (txtCheck.SelectedIndex == 0)
+            {
+                query = "Select * from medic where edate >= getdate()";
+                setDataGridview(query, "Valid Medicines", Color.Black);
+            }
+            else if (txtCheck.SelectedIndex == 1)
+            {
+                query = "Select * from medic where edate <= getdate()";
+                setDataGridview(query, "Expired Medicines", Color.Red);
+            }
+            else if(txtCheck.SelectedIndex == 2)
+            {
+                query = "Select * from medic";
+                setDataGridview(query, "", Color.Black);
+            }
+        }
+        private void setDataGridview(String query,String labelName,Color col)
+        {
+            DataSet ds = fn.getData(query);
+            guna2DataGridView1.DataSource = ds.Tables[0];
+            setLabel.Text = labelName;
+            setLabel.ForeColor = col;
+        }
+
+--------------------update medicine
+private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            String mid = txtMedicineId.Text;
+            String mname = txtMedicineName.Text;
+            String mnumber = txtMedicineNumber.Text;
+            String mdate = txtManufacturingDate.Text;
+            String edate = txtExpiryDate.Text;
+            Int64 quantity = Int64.Parse(txtQuantity.Text);
+            Int64 AddQuantity = Int64.Parse(txtAddQuantity.Text);
+            Int64 unitprice = Int64.Parse(txtPrice.Text);
+
+            totalQuantity = quantity + AddQuantity;
+
+            query = "update medic set mid ='" + mid + "',mname ='" + mname+ "',mnumber ='" + mnumber + "',mdate ='" + mdate + "',edate ='" + edate + "',quantity =" + totalQuantity + ",perUnit =" + unitprice + " where mid = '"+txtMedicineId.Text+"'";
+            fn.setData(query, "Medicine details updated.");
+
+
+        }
+-----------------------Add to cart
+ {
+            if(txtMedicineID.Text != "")
+            {
+                query = "Select quantity from medic where mid = '" + txtMedicineID.Text + "'";
+                ds = fn.getData(query);
+
+                quantity = Int64.Parse(ds.Tables[0].Rows[0][0].ToString());
+                newQuantity = quantity - Int64.Parse(txtNoUnits.Text);
+                if (newQuantity >=0)
+                {
+                    n = guna2DataGridView1.Rows.Add();
+                    guna2DataGridView1.Rows[n].Cells[0].Value = txtMedicineID.Text;
+                    guna2DataGridView1.Rows[n].Cells[1].Value = txtMedicineName.Text;
+                    guna2DataGridView1.Rows[n].Cells[2].Value = txtExpireDate.Text;
+                    guna2DataGridView1.Rows[n].Cells[3].Value = txtPricePerItem.Text;
+                    guna2DataGridView1.Rows[n].Cells[4].Value = txtNoUnits.Text;
+                    guna2DataGridView1.Rows[n].Cells[5].Value = txtTotalPrice.Text;
+
+                    totalAmount = totalAmount + int.Parse(txtTotalPrice.Text);
+                    totalLabel.Text = "Rs. " + totalAmount.ToString();
+
+                    query = "update medic set quantity = '"+newQuantity+"' where mid = '"+txtMedicineID.Text+"'";
+                    fn.setData(query, "Medicine Added");
+                }
+                else
+                {
+                    MessageBox.Show("Medicine is Out of Stock.\n only " + quantity + " Left","Warning !!",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                }
+
+                clearAll();
+                UC_P_SellMedicine_Load(this, null);
+            }
+            else
+            {
+                MessageBox.Show("Select Medicine First.", "Information !!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }       
+        }
+
+
+------------------------View Medicine
+ private void UC_P_ViewMedicine_Load(object sender, EventArgs e)
+        {
+            query = "Select * from medic";
+            DataSet ds = fn.getData(query);
+            guna2DataGridView1.DataSource = ds.Tables[0];
+
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            query = "Select * from medic where mname like '"+txtSearch.Text+"%'";
+            DataSet ds = fn.getData(query);
+            guna2DataGridView1.DataSource = ds.Tables[0];
+        }
+        String medicineId;
+        private void guna2DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                medicineId = guna2DataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you Sure?", "Delete Confirmation !", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
+                query = "delete from medic where mid = '"+ medicineId +"'";
+                fn.setData(query, "Medicine Record Deleted!");
+                UC_P_ViewMedicine_Load(this, null);
+            }
+            else
+            {
+                MessageBox.Show("Cant delete this Medicine", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnSync_Click(object sender, EventArgs e)
+        {
+            UC_P_ViewMedicine_Load(this, null);
+        }
+    }
+}
